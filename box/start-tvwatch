@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/sh
+termux-wake-lock
+pkill -f tvwatch.sh
+nohup bash $HOME/tvwatch.sh >/dev/null 2>&1 &

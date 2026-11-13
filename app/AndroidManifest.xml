@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="dev.local.tvoff"
+    android:versionCode="4"
+    android:versionName="1.3">
+
+    <application android:label="TV Off Countdown" android:allowBackup="false">
+        <activity
+            android:name=".CountdownActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="dev.local.tvoff.countdown"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar" />
+    </application>
+</manifest>
