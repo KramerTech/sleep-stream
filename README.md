@@ -1,6 +1,6 @@
 # sleep-stream
 
-This is pretty niche right? Why would you be running a streaming stick on a smart tv? Well, my fire tv is kind of old and laggy and I don't really care for its remote. My GoogleTV streaming stick is much better. But it'd just stay on forever because something about the sleep settings between the ONN and the Fire don't play nice together. But this, through a bit of ADB chicanery, addresses this problem.
+This is pretty niche right? Why would you be running a streaming stick on a smart tv? Well, my fire tv is kind of old and laggy and I don't really care for its remote. My GoogleTV streaming stick is much better. But it'd just stay on forever because something about the sleep settings between the ONN and the Fire don't play nice together. Enter: this repo. Through a bit of ADB chicanery, both device go to sleep properly.
 
 Built and tested with an onn 4K Streaming Box (Google TV, Android 14, 32-bit ARM) on
 top of an Insignia Fire TV Edition (`AFTJMST12`, Fire OS 6.7.1.1 / Android 7.1). It
