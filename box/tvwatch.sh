@@ -43,11 +43,12 @@ postponed() {
 }
 
 # One adb round-trip that reports everything we need for a check:
-#   AWAKE=0/1  PLAYERS=<n media/game players started>  IDLE_MS=<ms since input>  SESSION=<summary>
+#   STATE=Awake|Dreaming|Asleep|Dozing  PLAYERS=<n media/game players started>
+#   IDLE_MS=<ms since input>  SESSION=<summary>
 probe() {
   box shell '
     w=$(dumpsys power)
-    echo "$w" | grep -q "mWakefulness=Awake" && echo AWAKE=1 || echo AWAKE=0
+    echo "STATE=$(echo "$w" | grep -m1 -o "mWakefulness=[A-Za-z]*" | cut -d= -f2)"
     echo "IDLE_MS=$(echo "$w" | grep -m1 -o "lastUserActivityTime=[0-9]* ([0-9]* ms ago" | grep -o "([0-9]*" | tr -d "(")"
     echo "PLAYERS=$(dumpsys audio | grep "AudioPlaybackConfiguration" | grep "state:started" | grep -c -E "usage=USAGE_(MEDIA|GAME|UNKNOWN)")"
     echo "SESSION=$(dumpsys media_session | grep -E "^ +package=|state=PlaybackState" | sed "s/.*package=//;s/.*state=PlaybackState {state=//;s/(.*//" | paste -d: - - | grep -v -E "bluetooth|:NONE|:ERROR" | tr "\n" " ")"
@@ -110,14 +111,17 @@ while true; do
     was_postponed=0
 
     out=$(probe)
-    AWAKE=$(echo "$out"   | sed -n 's/^AWAKE=//p')
+    STATE=$(echo "$out"   | sed -n 's/^STATE=//p')
     IDLE_MS=$(echo "$out" | sed -n 's/^IDLE_MS=//p')
     PLAYERS=$(echo "$out" | sed -n 's/^PLAYERS=//p')
     SESSION=$(echo "$out" | sed -n 's/^SESSION=//p')
     IDLE_MS=${IDLE_MS:-0}; PLAYERS=${PLAYERS:-0}
 
-    if [ "$AWAKE" != 1 ]; then
-      ticks=0                                   # box asleep: nothing to do
+    # Awake and Dreaming (screensaver) both mean the box is on; the screensaver is
+    # exactly the "left on" state we want to catch. Asleep/Dozing = off.
+    if [ "$STATE" != Awake ] && [ "$STATE" != Dreaming ]; then
+      [ "$ticks" -gt 0 ] && log "box ${STATE:-unreachable} - reset (was $ticks)"
+      ticks=0
     elif [ "$PLAYERS" -gt 0 ]; then
       [ "$ticks" -gt 0 ] && log "audio playing - reset (was $ticks) [$SESSION]"
       ticks=0
@@ -126,8 +130,12 @@ while true; do
       ticks=0
     else
       ticks=$(( ticks + 1 ))
-      log "sleep tick $ticks/$TICKS_NEEDED (no audio, input ${IDLE_MS}ms ago) [$SESSION]"
+      log "sleep tick $ticks/$TICKS_NEEDED (no audio, input ${IDLE_MS}ms ago, $STATE) [$SESSION]"
       if [ "$ticks" -ge "$TICKS_NEEDED" ]; then
+        if [ "$STATE" = Dreaming ]; then   # leave the screensaver so the dialog is visible
+          box shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
+          sleep 2
+        fi
         if countdown; then
           if tv_off; then
             box shell input keyevent KEYCODE_SLEEP && log "box put to sleep"
