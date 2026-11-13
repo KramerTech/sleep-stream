@@ -1,2 +1,5 @@
 app/build/
+app/*.keystore
+app/*.idsig
+config
 .DS_Store

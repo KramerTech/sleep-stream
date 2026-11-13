@@ -1,0 +1,10 @@
+# Copy to `config` and edit. `config` is gitignored.
+# Both devices need static IPs (DHCP reservations on your router).
+
+TV_IP=192.168.0.60      # the TV (target that gets turned off)
+BOX_IP=192.168.0.61     # the streaming box (runs the watcher)
+ADB_PORT=5555           # network adb port on both devices
+
+CHECK=60                # seconds between idle checks (also the remote-input lookback)
+SLEEP_TIMEOUT=1800      # seconds of no audio + no input before the countdown
+COUNTDOWN=30            # seconds shown in the countdown dialog

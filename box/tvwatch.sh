@@ -5,11 +5,19 @@
 # out, turn the TV off (connect -> sleep -> verify -> disconnect), then sleep
 # the box. Any active check resets the count.
 
-BOX=127.0.0.1:5555
-TV=192.168.0.60:5555
+# Settings come from ~/tvwatch.conf (the repo's `config`, copied over by
+# box/deploy.sh). Defaults below apply to anything it doesn't set.
 CHECK=60            # seconds between checks (also the input lookback window)
-SLEEP_TIMEOUT=1800  # seconds of no audio + no input before the countdown (30 ticks)
+SLEEP_TIMEOUT=1800  # seconds of no audio + no input before the countdown
 COUNTDOWN=30        # seconds shown in the dialog
+ADB_PORT=5555
+[ -f "$HOME/tvwatch.conf" ] && . "$HOME/tvwatch.conf"
+if [ -z "$TV_IP" ]; then
+  echo "$(date '+%F %T') TV_IP not set in ~/tvwatch.conf - exiting" >> /sdcard/Download/tvwatch/tvwatch.log
+  exit 1
+fi
+BOX=127.0.0.1:$ADB_PORT
+TV=$TV_IP:$ADB_PORT
 TICKS_NEEDED=$(( SLEEP_TIMEOUT / CHECK ))
 
 LOG=/sdcard/Download/tvwatch/tvwatch.log
